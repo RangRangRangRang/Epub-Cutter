@@ -37,16 +37,35 @@ function guessNames(){
   });
 }
 function renderVols(){
-  $('#vols').innerHTML=items.map((it,i)=>`<div class="vol"><span class="no">${i+1}</span><div class="vi"><input data-i="${i}" value="${esc(it.name)}" placeholder="Tên quyển (có thể để trống)"><small class="meta">${esc(it.file)} · ${it.book.total} chương</small></div><button class="mini" data-up="${i}" ${i?'':'disabled'}>▲</button><button class="mini" data-dn="${i}" ${i<items.length-1?'':'disabled'}>▼</button><button class="mini" data-rm="${i}">✕</button></div>`).join('');
+  $('#vols').innerHTML=items.map((it,i)=>`<div class="vol"><span class="no">${i+1}</span><div class="vi"><input data-i="${i}" value="${esc(it.name)}" placeholder="Tên quyển (có thể để trống)"><small class="meta">${esc(it.file)} · ${it.book.total} chương</small><div style="margin-top:4px"><button class="btn" data-cv="${i}" style="padding:4px 10px;font-size:13px">🖼 ${it.cover?'Đổi':'Chọn'} ảnh bìa</button>${it.cover?`<img src="${it.cover.url}" alt="" style="height:44px;border-radius:4px;vertical-align:middle;margin-left:8px"><button class="btn" data-cvx="${i}" style="padding:4px 10px;font-size:13px;margin-left:6px">Bỏ</button>`:''}</div></div><button class="mini" data-up="${i}" ${i?'':'disabled'}>▲</button><button class="mini" data-dn="${i}" ${i<items.length-1?'':'disabled'}>▼</button><button class="mini" data-rm="${i}">✕</button></div>`).join('');
 }
 $('#vols').oninput=e=>{const i=e.target.dataset.i;if(i!==undefined){items[i].name=e.target.value;items[i].touched=true}};
 $('#vols').onclick=e=>{
   const b=e.target.closest('button');if(!b)return;
   const d=b.dataset;
+  if(d.cv!==undefined){cvIdx=+d.cv;cvIn.click();return}
+  if(d.cvx!==undefined){items[+d.cvx].cover=null;renderVols();return}
   if(d.up!==undefined){const i=+d.up;[items[i-1],items[i]]=[items[i],items[i-1]]}
   else if(d.dn!==undefined){const i=+d.dn;[items[i+1],items[i]]=[items[i],items[i+1]]}
   else if(d.rm!==undefined)items.splice(+d.rm,1);
   afterChange(false);
+};
+/* Ảnh bìa: chọn ảnh, thu nhỏ còn tối đa 1600px, đổi sang JPEG */
+const cvIn=document.createElement('input');cvIn.type='file';cvIn.accept='image/*';cvIn.className='hide';document.body.appendChild(cvIn);
+let cvIdx=-1;
+async function toJpeg(f){
+  const bmp=await createImageBitmap(f),k=Math.min(1,1600/Math.max(bmp.width,bmp.height));
+  const cv=document.createElement('canvas');cv.width=Math.round(bmp.width*k);cv.height=Math.round(bmp.height*k);
+  const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.drawImage(bmp,0,0,cv.width,cv.height);
+  const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.9));
+  if(!blob)throw new Error('toBlob');
+  return new Uint8Array(await blob.arrayBuffer());
+}
+cvIn.onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';
+  if(!f||!items[cvIdx])return;
+  try{const data=await toJpeg(f);items[cvIdx].cover={data,url:URL.createObjectURL(new Blob([data],{type:'image/jpeg'}))};renderVols()}
+  catch(err){console.error(err);toast('Không đọc được ảnh này')}
 };
 $('#clear').onclick=()=>{items=[];$('#st').value='';afterChange(false)};
 function afterChange(guess){
@@ -116,7 +135,7 @@ $('#cut').onclick=async()=>{
   try{
     await tick();
     const cl=makeCleaner(readOpts());
-    const vols=items.map((it,i)=>({...parseVol(it.name,i),
+    const vols=items.map((it,i)=>({...parseVol(it.name,i),cover:it.cover?it.cover.data:null,
       chapters:it.book.chapters.filter(c=>c.n>=r.a&&c.n<=r.b).map(c=>({title:chapterHeading(c),lines:cl.cleanChapter(c)}))
     })).filter(v=>v.chapters.length);
     const title=$('#st').value.trim()||items[0].book.title;
