@@ -13,24 +13,35 @@
 <header><div class="bar"><div class="logo">✂️ EPUB Cắt Chương</div><span class="meta">Chạy offline</span></div></header>
 <main>
 <section class="card" id="s1">
-  <h2><span class="step">1</span>Chọn file truyện</h2>
-  <div class="drop" id="drop"><b>📚</b>Bấm để chọn file .epub<br><small>hoặc kéo thả vào đây</small></div>
-  <input type="file" id="file" accept=".epub,application/epub+zip" class="hide">
+  <h2><span class="step">1</span>Chọn file truyện (có thể nhiều quyển)</h2>
+  <div class="drop" id="drop"><b>📚</b>Bấm để chọn một hoặc nhiều file .epub<br><small>hoặc kéo thả vào đây</small></div>
+  <input type="file" id="file" accept=".epub,application/epub+zip" multiple class="hide">
+  <div id="vols"></div>
+  <div class="hide" id="meta1">
+    <label style="margin-top:10px">Tên truyện</label><input id="st">
+    <div class="meta" style="margin-top:6px">Các quyển được ghép theo đúng thứ tự trên. Dùng ▲▼ để đổi thứ tự, sửa ô tên để đổi tên quyển.</div>
+    <button class="btn" id="clear" style="margin-top:8px">Xóa hết</button>
+  </div>
 </section>
 
 <section class="card hide" id="s2">
-  <div class="book"><div class="cover" id="cv">K</div>
-    <div><h3 id="bt"></h3><div class="meta" id="bm"></div></div>
-    <button class="btn" style="margin-left:auto" id="change">Đổi file</button></div>
+  <h2><span class="step">2</span>Làm sạch</h2>
+  <label class="opt"><input type="checkbox" id="o-notes" checked>Xóa note, lời dịch giả, người dịch, nguồn, quảng cáo nhóm dịch</label>
+  <label class="opt"><input type="checkbox" id="o-links" checked>Xóa link, tên miền, chữ báo "hình ảnh"</label>
+  <label class="opt"><input type="checkbox" id="o-icons" checked>Xóa icon, emoji, ký hiệu trang trí</label>
+  <label class="opt"><input type="checkbox" id="o-quotes" checked>Sửa <code>*lời thoại*</code> thành <code>"lời thoại"</code>, đồng nhất dấu ngoặc kép</label>
+  <label class="opt"><input type="checkbox" id="o-sb" checked>Giữ dấu ngắt cảnh (hiện * * *)</label>
+  <div id="reps" style="margin-top:10px"></div>
+  <details style="margin-top:10px"><summary class="meta" style="cursor:pointer">Xóa thêm theo mẫu riêng</summary>
+    <textarea id="custom" rows="3" placeholder="Mỗi dòng một mẫu. Dòng nào chứa mẫu sẽ bị xóa.&#10;Bắt đầu bằng re: để dùng regex"></textarea></details>
 </section>
 
 <section class="card hide" id="s3">
-  <h2><span class="step">2</span>Chọn khoảng chương</h2>
+  <h2><span class="step">3</span>Khoảng chương <small class="meta">(để trống = lấy hết)</small></h2>
   <div class="range">
-    <div><label>Từ chương</label><input type="number" id="a" min="1" value="1"></div>
-    <div><label>Đến chương</label><input type="number" id="b" min="1" value="100"></div>
+    <div><label>Từ chương</label><input type="number" id="a" min="1"></div>
+    <div><label>Đến chương</label><input type="number" id="b" min="1"></div>
   </div>
-  <div class="chips" id="chips"></div>
   <div class="err" id="err"></div>
   <div class="preview" id="pv"></div>
   <details style="margin-top:12px"><summary class="meta" style="cursor:pointer">Xem danh sách chương (chạm để chọn đầu/cuối)</summary>
@@ -39,25 +50,28 @@
 </section>
 
 <section class="card hide" id="s4">
-  <h2><span class="step">3</span>Cắt file</h2>
-  <button class="btn p big" id="cut">✂️ Cắt &amp; tạo file</button>
+  <h2><span class="step">4</span>Tạo file</h2>
+  <button class="btn p big" id="cut">✨ Làm sạch &amp; tạo file</button>
 </section>
 
 <section class="card result hide" id="s5">
-  <h2>✅ Đã cắt xong</h2>
+  <h2>✅ Xong</h2>
   <div class="file"><div class="ic">📘</div><div><b id="fn"></b><div class="meta" id="fm"></div></div></div>
+  <div class="preview" id="sum"></div>
+  <details style="margin:10px 0"><summary class="meta" style="cursor:pointer">Xem các dòng đã xóa (kiểm tra xem có xóa nhầm không)</summary><div class="list" id="log"></div></details>
   <div class="row">
     <button class="btn p" id="share" style="flex:1">📤 Chia sẻ (Zalo/Facebook)</button>
     <button class="btn" id="save" style="flex:1">💾 Lưu về máy</button>
   </div>
-  <div class="row" style="margin-top:10px"><button class="btn" id="again">Cắt đoạn khác từ truyện này</button></div>
+  <div class="row" style="margin-top:10px"><button class="btn" id="again">Chỉnh lại &amp; tạo lại</button></div>
 </section>
 <p class="note">File truyện được xử lý ngay trên máy, không tải lên đâu cả. File gốc không bị sửa.</p>
 </main>
 <div class="toast" id="toast"></div>
 <script src="assets/js/jszip.min.js"></script>
 <script src="assets/js/epub-read.js"></script>
-<script src="assets/js/epub-cut.js"></script>
+<script src="assets/js/epub-clean.js"></script>
+<script src="assets/js/epub-build.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

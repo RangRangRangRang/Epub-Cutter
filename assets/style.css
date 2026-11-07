@@ -44,3 +44,14 @@ label{font-size:13px;color:var(--mut);display:block;margin-bottom:3px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:.25s}
 .toast.on{opacity:1}
 .note{font-size:12px;color:var(--mut);text-align:center;margin-top:24px}
+.vol{display:flex;gap:8px;align-items:center;margin-top:10px}
+.vol .no{width:26px;height:26px;border-radius:50%;background:var(--ac2);color:var(--ac);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vol .vi{flex:1;min-width:0}.vol .vi small{display:block;word-break:break-all}
+.mini{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;width:34px;height:34px;cursor:pointer;flex-shrink:0}
+.mini:disabled{opacity:.3;cursor:default}
+.opt{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--tx);margin:8px 0;cursor:pointer}
+.opt input,.rep input{width:auto;margin-top:5px}
+.rep{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--tx);padding:4px 0}
+.rep i{color:var(--mut);font-style:normal}
+textarea{font:inherit;width:100%;padding:10px;margin-top:8px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx)}
+code{background:var(--ac2);color:var(--ac);padding:0 5px;border-radius:5px}
